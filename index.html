@@ -186,7 +186,7 @@ footer p{margin:0}
   var sel = $("attivita");
   GRUPPI.forEach(function(g,i){var o=document.createElement("option");o.value=i;o.textContent=g[0];sel.appendChild(o)});
 
-  var eur = new Intl.NumberFormat("it-IT",{style:"currency",currency:"EUR",maximumFractionDigits:0});
+  var eur = {format:function(n){return String(Math.round(n)).replace(/\B(?=(\d{3})+(?!\d))/g,".")+" €"}};
   var pct = function(x,d){return (x*100).toLocaleString("it-IT",{maximumFractionDigits:d==null?2:d})+"%"};
   var num = function(id){var v=parseFloat($(id).value);return isFinite(v)&&v>0?v:0};
 
