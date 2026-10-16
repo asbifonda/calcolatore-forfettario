@@ -1,0 +1,248 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Calcolatore Forfettario 2026</title>
+<link rel="canonical" href="https://asbifonda.github.io/calcolatore-forfettario/">
+<meta name="description" content="Calcola gratis tasse e contributi INPS nel regime forfettario 2026: imposta sostitutiva 5% o 15%, Gestione Separata, artigiani e commercianti, netto in tasca e quanto accantonare.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;700;800&family=Source+Sans+3:wght@400;600&family=IBM+Plex+Mono:wght@500&display=swap">
+</head>
+<body>
+<style>
+/* Layout: due colonne da modulo fiscale, a sinistra i dati, a destra il conto riga per riga; una colonna su telefono */
+:root{
+  --bg:#f3f5f7; --paper:#ffffff; --ink:#14232f; --muted:#5a6873; --line:#d5dde3;
+  --accent:#1d5c7a; --accent-soft:#e2eef4; --good:#2f7d4f; --warn:#a86a00; --bad:#b3261e;
+  --display:"Archivo","Helvetica Neue",Arial,sans-serif;
+  --body:"Source Sans 3","Segoe UI",Arial,sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#0f171d; --paper:#16222b; --ink:#e6edf1; --muted:#9aabb6; --line:#2a3a46;
+  --accent:#7fb8d4; --accent-soft:#1c3340; --good:#6cc08f; --warn:#e0a640; --bad:#ef8a83; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0f171d; --paper:#16222b; --ink:#e6edf1; --muted:#9aabb6; --line:#2a3a46;
+  --accent:#7fb8d4; --accent-soft:#1c3340; --good:#6cc08f; --warn:#e0a640; --bad:#ef8a83; color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font:16px/1.5 var(--body);
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:32px 48px}
+.wrap{max-width:1040px;margin:0 auto;display:grid;gap:28px}
+header{display:grid;gap:8px;max-width:68ch}
+.eyebrow{font:500 12px var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--accent)}
+h1{font:800 clamp(28px,4.5vw,42px)/1.1 var(--display);margin:0;text-wrap:balance;letter-spacing:-.01em}
+header p{margin:0;color:var(--muted)}
+.grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.1fr);gap:20px;align-items:start}
+@media (max-width:780px){.grid{grid-template-columns:minmax(0,1fr)}}
+.panel{background:var(--paper);border:1px solid var(--line);border-radius:6px;padding:22px;display:grid;gap:16px;min-width:0}
+h2{font:700 15px var(--display);margin:0;letter-spacing:.01em}
+label{display:grid;gap:6px;font-weight:600;font-size:14px}
+.hint{font-weight:400;color:var(--muted);font-size:13px}
+input[type=number],select{width:100%;font:16px var(--body);color:var(--ink);background:var(--bg);
+  border:1px solid var(--line);border-radius:4px;padding:10px 12px}
+input[type=number]{font-family:var(--mono)}
+input:focus-visible,select:focus-visible,a:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.seg{display:grid;grid-template-columns:1fr 1fr;border:1px solid var(--line);border-radius:4px;overflow:hidden}
+.seg input{position:absolute;opacity:0;pointer-events:none}
+.seg label{display:block;text-align:center;padding:10px 6px;cursor:pointer;font-weight:600;font-size:14px;background:var(--bg)}
+.seg input:checked+label{background:var(--accent);color:var(--paper)}
+.seg input:focus-visible+label{outline:2px solid var(--accent);outline-offset:-3px}
+.check{display:flex;gap:10px;align-items:flex-start;font-weight:400}
+.check input{margin-top:4px;width:18px;height:18px;accent-color:var(--accent)}
+.headline{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+@media (max-width:480px){.headline{grid-template-columns:minmax(0,1fr)}}
+.kpi{display:grid;gap:2px}
+.kpi span{font-size:13px;color:var(--muted)}
+.kpi strong{font:500 clamp(20px,3vw,26px) var(--mono);font-variant-numeric:tabular-nums}
+.kpi.main strong{color:var(--accent)}
+table{width:100%;border-collapse:collapse;font-size:15px}
+td{padding:8px 0;border-bottom:1px solid var(--line);vertical-align:top}
+td:last-child{text-align:right;font-family:var(--mono);font-variant-numeric:tabular-nums;white-space:nowrap;padding-left:12px}
+tr.sum td{font-weight:600;border-bottom:2px solid var(--ink)}
+tr.sub td{color:var(--muted);font-size:13px}
+.op{font-family:var(--mono);color:var(--muted);display:inline-block;width:1.4em}
+.meter{display:grid;gap:6px}
+.bar{height:10px;background:var(--bg);border:1px solid var(--line);border-radius:5px;overflow:hidden}
+.bar i{display:block;height:100%;background:var(--good);width:0;transition:width .3s}
+.pill{justify-self:start;font-size:13px;font-weight:600;padding:3px 10px;border-radius:999px;border:1px solid currentColor}
+.ok{color:var(--good)} .warn{color:var(--warn)} .bad{color:var(--bad)}
+.cta{background:var(--accent-soft);border:1px solid var(--line);border-radius:6px;padding:20px 22px;display:flex;gap:16px;align-items:center;justify-content:space-between;flex-wrap:wrap}
+.cta div{min-width:0;max-width:60ch}
+.cta h2{font-size:17px;margin-bottom:4px}
+.cta p{margin:0;color:var(--muted);font-size:15px}
+.btn{font:700 15px var(--display);background:var(--accent);color:var(--paper);text-decoration:none;padding:12px 18px;border-radius:4px;white-space:nowrap}
+footer{color:var(--muted);font-size:13px;max-width:80ch;display:grid;gap:6px}
+footer p{margin:0}
+@media (prefers-reduced-motion:reduce){.bar i{transition:none}}
+</style>
+
+<div class="wrap">
+  <header>
+    <div class="eyebrow">Regime forfettario · anno 2026</div>
+    <h1>Quanto ti resta in tasca col forfettario?</h1>
+    <p>Inserisci quanto incassi in un anno: il calcolatore stima imposta sostitutiva, contributi INPS e quanto mettere da parte su ogni fattura. Gratis, senza registrazione, i dati restano nel tuo browser.</p>
+  </header>
+
+  <div class="grid">
+    <form class="panel" id="form" autocomplete="off">
+      <h2>I tuoi dati</h2>
+      <label for="incassi">Incassi dell'anno (€)
+        <input type="number" id="incassi" min="0" step="100" value="30000" inputmode="decimal">
+        <span class="hint">Conta quello che ti pagano davvero nell'anno, non il fatturato emesso.</span>
+      </label>
+      <label for="attivita">Tipo di attività (gruppo ATECO)
+        <select id="attivita"></select>
+      </label>
+      <div style="display:grid;gap:6px">
+        <span style="font-weight:600;font-size:14px">Aliquota imposta sostitutiva</span>
+        <div class="seg" role="radiogroup" aria-label="Aliquota">
+          <input type="radio" name="aliq" id="aliq5" value="0.05" checked><label for="aliq5">5% · primi 5 anni</label>
+          <input type="radio" name="aliq" id="aliq15" value="0.15"><label for="aliq15">15% · ordinaria</label>
+        </div>
+      </div>
+      <label for="gestione">Dove versi i contributi
+        <select id="gestione">
+          <option value="gs">Gestione Separata INPS (professionisti)</option>
+          <option value="art">INPS Artigiani</option>
+          <option value="com">INPS Commercianti</option>
+          <option value="cassa">Cassa professionale (inserisco l'importo)</option>
+        </select>
+      </label>
+      <label class="check" for="riduz" id="riduzWrap" hidden>
+        <input type="checkbox" id="riduz">
+        <span>Ho chiesto la riduzione del 35% dei contributi<br><span class="hint">Possibile solo per artigiani e commercianti in forfettario.</span></span>
+      </label>
+      <label for="cassa" id="cassaWrap" hidden>Contributi annui alla tua cassa (€)
+        <input type="number" id="cassa" min="0" step="50" value="3000" inputmode="decimal">
+      </label>
+      <label for="mesi">Mesi di attività nel 2026
+        <input type="number" id="mesi" min="1" max="12" step="1" value="12" inputmode="numeric">
+        <span class="hint">Se hai aperto la partita IVA durante l'anno il contributo minimo si riduce.</span>
+      </label>
+    </form>
+
+    <section class="panel" aria-live="polite">
+      <h2>Il tuo conto</h2>
+      <div class="headline">
+        <div class="kpi main"><span>Netto in tasca all'anno</span><strong id="netto">–</strong></div>
+        <div class="kpi"><span>Netto al mese</span><strong id="nettoMese">–</strong></div>
+        <div class="kpi"><span>Da accantonare per ogni 100 € incassati</span><strong id="perc">–</strong></div>
+      </div>
+      <table>
+        <tbody>
+          <tr><td>Incassi</td><td id="r_inc"></td></tr>
+          <tr><td><span class="op">×</span>Coefficiente di redditività</td><td id="r_coeff"></td></tr>
+          <tr class="sum"><td>Reddito forfettario</td><td id="r_red"></td></tr>
+          <tr><td><span class="op">−</span>Contributi previdenziali</td><td id="r_contr"></td></tr>
+          <tr class="sub"><td id="r_contrNote" colspan="2" style="text-align:left;font-family:var(--body)"></td></tr>
+          <tr class="sum"><td>Reddito imponibile</td><td id="r_imp"></td></tr>
+          <tr><td><span class="op">×</span>Aliquota imposta sostitutiva</td><td id="r_aliq"></td></tr>
+          <tr class="sum"><td>Imposta sostitutiva</td><td id="r_tax"></td></tr>
+          <tr class="sum"><td>Totale tasse e contributi</td><td id="r_tot"></td></tr>
+        </tbody>
+      </table>
+      <div class="meter">
+        <div style="display:flex;justify-content:space-between;gap:8px;font-size:14px"><span>Soglia di 85.000 €</span><span id="sogliaTxt" style="font-family:var(--mono)"></span></div>
+        <div class="bar"><i id="sogliaBar"></i></div>
+        <span class="pill ok" id="stato"></span>
+      </div>
+    </section>
+  </div>
+
+  <aside class="cta" id="gestionale">
+    <div>
+      <h2>Sai già quanto pagherai a giugno e a novembre?</h2>
+      <p>Il Forfettario Facile per Excel e Google Sheets calcola saldi e acconti con date e codici F24, segue fatture scadute e clienti, ti dice quanto mettere nel fondo tasse e quanto fatturare per il netto che vuoi. Senza macro: funziona anche su Mac e iPad.</p>
+    </div>
+    <a class="btn" id="ctaLink" href="#gestionale" target="_blank" rel="noopener">Scopri il Forfettario Facile</a>
+  </aside>
+
+  <section class="panel" style="gap:8px"><h2>Guide al forfettario</h2><a href="scadenze-forfettario-2026.html" style="color:var(--accent);font-weight:600">Scadenze del forfettario 2026: quando paghi e cosa</a><a href="acconti-forfettario.html" style="color:var(--accent);font-weight:600">Acconti del forfettario: come si calcolano</a><a href="quanto-accantonare-forfettario.html" style="color:var(--accent);font-weight:600">Quanto mettere da parte per tasse e INPS col forfettario</a><a href="contributi-inps-forfettario-2026.html" style="color:var(--accent);font-weight:600">Contributi INPS del forfettario nel 2026</a><a href="tariffa-oraria-forfettario.html" style="color:var(--accent);font-weight:600">Quanto chiedere all'ora col forfettario</a></section>
+
+  <footer>
+    <p>Parametri 2026: coefficienti dell'Allegato 4 della L. 190/2014; Gestione Separata 26,07%; artigiani 24% e commercianti 24,48% con minimale di 18.808 €, fascia aggiuntiva +1% oltre 56.224 € e massimale di 122.295 € (circolare INPS n. 14/2026).</p>
+    <p>I contributi sono dedotti come se li versassi nello stesso anno, la situazione tipica dopo il primo anno. È una stima a scopo informativo e non sostituisce un commercialista: acconti, saldi e casi particolari non sono considerati.</p>
+  </footer>
+</div>
+
+<script>
+(function(){
+  // Sostituisci con il link al prodotto su Gumroad quando è online
+  
+  var P = {gs:0.2607, minimale:18808, art:0.24, com:0.2448, fascia:56224, massimale:122295, maternita:7.44, riduzione:0.35, limite:85000, uscita:100000};
+  var GRUPPI = [
+    ["Attività professionali, scientifiche, tecniche, sanitarie, istruzione, finanza (78%)",0.78],
+    ["Altre attività economiche (67%)",0.67],
+    ["Commercio all'ingrosso e al dettaglio (40%)",0.40],
+    ["Alloggio e ristorazione (40%)",0.40],
+    ["Industrie alimentari e delle bevande (40%)",0.40],
+    ["Commercio ambulante alimentare (40%)",0.40],
+    ["Commercio ambulante di altri prodotti (54%)",0.54],
+    ["Intermediari del commercio (62%)",0.62],
+    ["Costruzioni e attività immobiliari (86%)",0.86]
+  ];
+  var $ = function(id){return document.getElementById(id)};
+  var sel = $("attivita");
+  GRUPPI.forEach(function(g,i){var o=document.createElement("option");o.value=i;o.textContent=g[0];sel.appendChild(o)});
+
+  var eur = new Intl.NumberFormat("it-IT",{style:"currency",currency:"EUR",maximumFractionDigits:0});
+  var pct = function(x,d){return (x*100).toLocaleString("it-IT",{maximumFractionDigits:d==null?2:d})+"%"};
+  var num = function(id){var v=parseFloat($(id).value);return isFinite(v)&&v>0?v:0};
+
+  function contributi(reddito, gest, riduz, mesi, cassa){
+    if (gest==="gs") return {v:reddito*P.gs, note:"Gestione Separata: 26,07% del reddito forfettario"};
+    if (gest==="cassa") return {v:cassa, note:"Importo indicato per la tua cassa professionale"};
+    var r = gest==="art"?P.art:P.com;
+    var base = Math.max(reddito, P.minimale*mesi/12);
+    var ivs = r*Math.min(base,P.fascia) + (r+0.01)*Math.max(0, Math.min(base,P.massimale)-P.fascia);
+    var tot = ivs*(riduz?1-P.riduzione:1) + P.maternita*mesi/12;
+    var min = (r*P.minimale*mesi/12)*(riduz?1-P.riduzione:1) + P.maternita*mesi/12;
+    return {v:tot, note:(gest==="art"?"Artigiani":"Commercianti")+": contributo minimo "+eur.format(min)+" anche con reddito basso"+(riduz?", con riduzione del 35%":"")};
+  }
+
+  function calc(){
+    var gest = $("gestione").value;
+    $("riduzWrap").hidden = !(gest==="art"||gest==="com");
+    $("cassaWrap").hidden = gest!=="cassa";
+    var inc = num("incassi");
+    var coeff = GRUPPI[+sel.value][1];
+    var aliq = parseFloat(document.querySelector("input[name=aliq]:checked").value);
+    var mesi = Math.min(12, Math.max(1, Math.round(num("mesi")||12)));
+    var red = inc*coeff;
+    var c = contributi(red, gest, $("riduz").checked && !$("riduzWrap").hidden, mesi, num("cassa"));
+    var imp = Math.max(0, red-c.v);
+    var tax = imp*aliq;
+    var tot = tax+c.v;
+    var netto = inc-tot;
+    $("netto").textContent = eur.format(netto);
+    $("nettoMese").textContent = eur.format(netto/12);
+    $("perc").textContent = inc>0 ? eur.format(tot/inc*100) : "–";
+    $("r_inc").textContent = eur.format(inc);
+    $("r_coeff").textContent = pct(coeff,0);
+    $("r_red").textContent = eur.format(red);
+    $("r_contr").textContent = eur.format(c.v);
+    $("r_contrNote").textContent = c.note;
+    $("r_imp").textContent = eur.format(imp);
+    $("r_aliq").textContent = pct(aliq,0);
+    $("r_tax").textContent = eur.format(tax);
+    $("r_tot").textContent = eur.format(tot);
+    var used = inc/P.limite;
+    $("sogliaBar").style.width = Math.min(100, used*100)+"%";
+    $("sogliaTxt").textContent = pct(used,1)+" usata";
+    var st=$("stato"), cls="ok", txt="Sei dentro la soglia, margine di "+eur.format(P.limite-inc);
+    if (inc>P.uscita){cls="bad";txt="Oltre 100.000 €: esci subito dal forfettario e applichi l'IVA"}
+    else if (inc>P.limite){cls="bad";txt="Oltre 85.000 €: dal 2027 esci dal forfettario"}
+    else if (used>=0.8){cls="warn";txt="Sei oltre l'80% della soglia: margine di "+eur.format(P.limite-inc)}
+    st.className="pill "+cls; st.textContent=txt;
+    $("sogliaBar").style.background = cls==="ok"?"var(--good)":cls==="warn"?"var(--warn)":"var(--bad)";
+  }
+  $("form").addEventListener("input", calc);
+  $("form").addEventListener("change", calc);
+  $("form").addEventListener("submit", function(e){e.preventDefault()});
+  calc();
+})();
+</script>
+<script src="config.js"></script>
+</body>
+</html>
