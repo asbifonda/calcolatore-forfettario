@@ -1,5 +1,5 @@
 // Metti qui il link al prodotto su Gumroad: tutti i bottoni del sito lo useranno
-var LINK_GESTIONALE = "https://fauce.gumroad.com/l/forfettario-facile";
+var LINK_GESTIONALE = "https://strumentipartitaiva.gumroad.com/l/forfettario-facile";
 (function(){
   var links = document.querySelectorAll(".js-gestionale, #ctaLink");
   for (var i = 0; i < links.length; i++) {
